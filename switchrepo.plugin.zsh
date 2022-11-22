@@ -24,7 +24,8 @@ function switch-repo(){
 
        base64AuthInfo="$(echo -n Username:$SWITCHREPO_PAT | base64)"
 
-      curl --request GET \
+      responsecode=$(curl --request GET \
+      --write-out '%{http_code}' \
         --url "https://dev.azure.com/$SWITCHREPO_ORG/$SWITCHREPO_PROJ/_apis/git/repositories?api-version=5.0" \
         --header 'Content-Type: application/json' \
         --header "Authorization: Basic $base64AuthInfo"\
@@ -33,8 +34,13 @@ function switch-repo(){
         --header 'Host: dev.azure.com' \
         --header 'cache-control: no-cache' \
         --silent \
-        --output repos.json
+        --output repos.json)
 
+        
+        if [[ $responsecode -ne 200 ]]; then
+          echo "Error in connecting to Azure DevOps. Please check your configured PAT."
+          return
+        fi
 
         webUrl=`cat repos.json | jq  "[.value[] | .webUrl]"`
         filteredList=()
@@ -78,7 +84,7 @@ function switch-repo(){
         fi
     else
         echo "Usage : sr <repo name>"
-        echo "Example : sr fusion"
+        echo "Example : sr banana"
     fi
 }
 
