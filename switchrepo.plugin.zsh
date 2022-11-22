@@ -34,7 +34,7 @@ function switch-repo(){
         --header 'Host: dev.azure.com' \
         --header 'cache-control: no-cache' \
         --silent \
-        --output repos.json)
+        --output $ZSH/repos.json)
 
         
         if [[ $responsecode -ne 200 ]]; then
@@ -43,7 +43,7 @@ function switch-repo(){
         fi
 
         search=$(echo "$1" | awk '{print tolower($0)}')
-        filtered=$(jq --arg SEARCH "$search" '[.value[] | select(.name | ascii_downcase | contains ($SEARCH)) | .webUrl]' repos.json)
+        filtered=$(jq --arg SEARCH "$search" '[.value[] | select(.name | ascii_downcase | contains ($SEARCH)) | .webUrl]' $ZSH/repos.json)
 
         filteredList=()
         selectList=()
@@ -69,12 +69,10 @@ function switch-repo(){
           git pull 
         else
           pushd $SWITCHREPO_WORKROOT > /dev/null
-          echo "start loop"
           for i in "${filteredList[@]}"
           do
             if [[ "$i" == *"$repository" ]]
             then
-            echo "before clone"
               git clone $i > /dev/null
               pushd $DIR > /dev/null
               break
