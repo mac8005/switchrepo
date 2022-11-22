@@ -26,7 +26,7 @@ function switch-repo(){
 
       responsecode=$(curl --request GET \
       --write-out '%{http_code}' \
-        --url "https://dev.azure.com/$SWITCHREPO_ORG/$SWITCHREPO_PROJ/_apis/git/repositories?api-version=5.0" \
+        --url "https://dev.azure.com/$SWITCHREPO_ORG/$SWITCHREPO_PROJ/_apis/git/repositories?api-version=7.0" \
         --header 'Content-Type: application/json' \
         --header "Authorization: Basic $base64AuthInfo"\
         --header 'Cache-Control: no-cache' \
@@ -42,22 +42,19 @@ function switch-repo(){
           return
         fi
 
-        webUrl=`cat repos.json | jq  "[.value[] | .webUrl]"`
+        search=$(echo "$1" | awk '{print tolower($0)}')
+        filtered=$(jq --arg SEARCH "$search" '[.value[] | select(.name | ascii_downcase | contains ($SEARCH)) | .webUrl]' repos.json)
+
         filteredList=()
         selectList=()
-        for row in $(echo "$webUrl" | jq -r '.[]'); do
-           
+
+        for row in $(echo "$filtered" | jq -r '.[]'); do
             repo=$(echo "$row" | sed 's:.*/::')
             url=$(echo "$row")
-            search=$(echo "$1" | awk '{print tolower($0)}')
-            repolower=$(echo "$repo" | awk '{print tolower($0)}' )
-
-            if [[ $repolower == *"$search"* ]]; then
-                filteredList+=("$url")
-                selectList+=("$repo")
-            fi
-         
+            filteredList+=("$url")
+            selectList+=("$repo")
         done
+
         PS3="Select Repository: "
         select repository in "${selectList[@]}"
         do
@@ -68,14 +65,16 @@ function switch-repo(){
         if [ -d "$DIR" ]; then
         # Take action if $DIR exists. #
           pushd $DIR > /dev/null
-          git fetch --prune > /dev/null
-          git pull > /dev/null
+          #git fetch --prune > /dev/null
+          git pull 
         else
           pushd $SWITCHREPO_WORKROOT > /dev/null
+          echo "start loop"
           for i in "${filteredList[@]}"
           do
             if [[ "$i" == *"$repository" ]]
             then
+            echo "before clone"
               git clone $i > /dev/null
               pushd $DIR > /dev/null
               break
