@@ -1,22 +1,18 @@
 function switch-repo(){
     if ! [ -z $1 ] ; then
-        if  [ -n "${SWITCHREPO_WORKROOT}" ]; then
-        else
+        if  [ ! -n "${SWITCHREPO_WORKROOT}" ]; then
           echo '$SWITCHREPO_WORKROOT missing. Please set Directory for Repos e.g. export SWITCHREPO_WORKROOT=/Users/massimo/repos'
           return
         fi
-        if  [ -n "${SWITCHREPO_ORG}" ]; then
-        else
+        if  [ ! -n "${SWITCHREPO_ORG}" ]; then
           echo '$SWITCHREPO_ORG missing. Please set Azure DevOps Org for Repos e.g. export SWITCHREPO_ORG=myorg'
           return
         fi
-        if  [ -n "${SWITCHREPO_PROJ}" ]; then
-        else
+        if  [ ! -n "${SWITCHREPO_PROJ}" ]; then
           echo '$SWITCHREPO_PROJ missing. Please set Azure DevOps Project for Repos e.g. export SWITCHREPO_PROJ=myproject'
           return
         fi
-        if  [ -n "${SWITCHREPO_PAT}" ]; then
-        else
+        if  [ ! -n "${SWITCHREPO_PAT}" ]; then
           echo '$SWITCHREPO_PAT missing. Please set Azure DevOps PAT for Repos e.g. export SWITCHREPO_PAT=XYZ'
           return
         fi
