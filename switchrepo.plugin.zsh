@@ -40,7 +40,22 @@ function switch-repo(){
 
         search=$(echo "$1" | awk '{print tolower($0)}')
         filtered=$(jq --arg SEARCH "$search" '[.value[] | select(.name | ascii_downcase | contains ($SEARCH)) | .webUrl]' $ZSH/repos.json)
-
+        filteredNames=$(jq --arg SEARCH "$search" '[.value[] | select(.name | ascii_downcase | contains ($SEARCH)) | .name]' $ZSH/repos.json)
+        filteredDirs=()
+   
+        for d in $SWITCHREPO_WORKROOT*/; 
+        do
+            
+            dirName=$(basename "$d")
+            dirNameLower=$(echo "$dirName" | awk '{print tolower($0)}')
+           
+            if [[ $dirNameLower == *"$search"* ]]; then
+           
+              filteredDirs+=($dirName)
+            fi
+            
+        done  
+       
         filteredList=()
         selectList=()
 
@@ -50,6 +65,17 @@ function switch-repo(){
             filteredList+=("$url")
             selectList+=("$repo")
         done
+
+        for dir in "${filteredDirs[@]}"; do
+            # if not contains
+            if [[ ! " ${selectList[@]} " =~ " ${dir} " ]]; then
+               selectList+=("$dir")
+            fi
+        done
+        if [ ${#selectList[@]} -lt 1 ]; then
+          echo "No Repositories found!"
+          return
+        fi
 
         PS3="Select Repository: "
         select repository in "${selectList[@]}"
