@@ -77,8 +77,9 @@ function switch-repo(){
           return
         fi
         if [ ${#selectList[@]} -eq 1 ]; then
-                  echo "Only one repository found: ${selectList[0]}"
-                  repository=${selectList[0]}
+                 echo "Only one repository found: ${selectList[@]}"
+                 repository="${selectList[@]}"
+
         else
                 PS3="Select Repository: "
                 select repository in "${selectList[@]}"
