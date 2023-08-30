@@ -76,13 +76,17 @@ function switch-repo(){
           echo "No Repositories found!"
           return
         fi
-
-        PS3="Select Repository: "
-        select repository in "${selectList[@]}"
-        do
-            echo "Selected repository: $repository"
-            break
-        done
+        if [ ${#selectList[@]} -eq 1 ]; then
+                  echo "Only one repository found: ${selectList[0]}"
+                  repository=${selectList[0]}
+        else
+                PS3="Select Repository: "
+                select repository in "${selectList[@]}"
+                do
+                    echo "Selected repository: $repository"
+                    break
+                done
+        fi
         DIR="$SWITCHREPO_WORKROOT$repository/"
         if [ -d "$DIR" ]; then
         # Take action if $DIR exists. #
